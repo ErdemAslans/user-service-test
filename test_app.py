@@ -32,11 +32,36 @@ def test_register_success(client):
 def test_register_missing_email(client):
     response = client.post("/users/register", json={"password": "secret123"})
     assert response.status_code == 400
+    assert response.get_json() == {"error": "Email and password are required"}
 
 
 def test_register_missing_password(client):
     response = client.post("/users/register", json={"email": "alice@example.com"})
     assert response.status_code == 400
+    assert response.get_json() == {"error": "Email and password are required"}
+
+
+def test_register_invalid_email_format(client):
+    response = client.post(
+        "/users/register",
+        json={"email": "invalid-email", "password": "secret123"},
+    )
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid email format"}
+
+    response = client.post(
+        "/users/register",
+        json={"email": "user@", "password": "secret123"},
+    )
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid email format"}
+
+    response = client.post(
+        "/users/register",
+        json={"email": "@domain.com", "password": "secret123"},
+    )
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid email format"}
 
 
 def test_list_users_initially_empty(client):
