@@ -1,8 +1,4 @@
-"""Minimal user registration API — intentionally missing email validation.
-
-This is a Day 2 test repo. The AI agent's job is to add email format validation
-to the /users/register endpoint per TASK-123.
-"""
+import re
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -10,6 +6,10 @@ app = Flask(__name__)
 # Simple in-memory user store (resets on app restart). Not for production.
 _USERS: list[dict] = []
 
+# Basic email regex for validation
+# Updated regex to be more robust, preventing invalid domain formats like
+# leading/trailing hyphens in labels, or consecutive dots.
+EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$";
 
 @app.route("/users/register", methods=["POST"])
 def register():
@@ -20,8 +20,9 @@ def register():
     if not email or not password:
         return jsonify({"error": "Email and password are required"}), 400
 
-    # NOTE: email format validation is intentionally missing.
-    # AI agent should add it to satisfy TASK-123.
+    # Add email format validation per TASK-123.
+    if not re.match(EMAIL_REGEX, email):
+        return jsonify({"error": "Invalid email format"}), 400
 
     _USERS.append({"email": email, "password": password})
     return jsonify({"email": email, "id": len(_USERS)}), 201
