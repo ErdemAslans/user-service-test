@@ -1,8 +1,4 @@
-"""Minimal user registration API — intentionally missing email validation.
-
-This is a Day 2 test repo. The AI agent's job is to add email format validation
-to the /users/register endpoint per TASK-123.
-"""
+import re
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -34,6 +30,11 @@ def list_users():
 
 @app.route("/health", methods=["GET"])
 def health():
+    return jsonify({"status": "ok"})
+
+
+@app.route("/healthz", methods=["GET"])
+def healthz():
     return jsonify({"status": "ok"})
 
 
