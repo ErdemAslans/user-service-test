@@ -1,4 +1,3 @@
-"""Tests for the user registration API."""
 import pytest
 
 from app import app, _USERS
@@ -37,6 +36,32 @@ def test_register_missing_email(client):
 def test_register_missing_password(client):
     response = client.post("/users/register", json={"email": "alice@example.com"})
     assert response.status_code == 400
+
+
+def test_register_invalid_email_format(client):
+    response = client.post(
+        "/users/register",
+        json={"email": "invalid-email", "password": "secret123"},
+    )
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["error"] == "Invalid email format"
+
+    response = client.post(
+        "/users/register",
+        json={"email": "@example.com", "password": "secret123"},
+    )
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["error"] == "Invalid email format"
+
+    response = client.post(
+        "/users/register",
+        json={"email": "user@.com", "password": "secret123"},
+    )
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["error"] == "Invalid email format"
 
 
 def test_list_users_initially_empty(client):
